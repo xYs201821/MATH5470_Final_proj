@@ -139,10 +139,10 @@ def main():
     final_predictions, metrics = get_pred_metrics(model, test_loader, args.device)
     df = get_labels_df(args.data, args.year_split+1, args.year_end+1, args.ret_days)
     
-    avg_returns, avg_annualized_returns = get_returns(df, final_predictions, args.ret_days)
+    avg_annualized_returns = get_returns(df, final_predictions, args.ret_days)
     with open(os.path.join(args.output, f'{args.model_name}.yaml'), 'w') as f:
         yaml.dump(metrics, f, default_flow_style=False)
-        yaml.dump(avg_returns, f, default_flow_style=False)
+        #yaml.dump(avg_returns, f, default_flow_style=False)
         yaml.dump(avg_annualized_returns, f, default_flow_style=False)
     #print(f"Average Returns: {avg_returns}")
     #print(f"Average Annualized Returns: {avg_annualized_returns}")

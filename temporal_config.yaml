@@ -1,0 +1,15 @@
+activation: LReLu
+batch_normalization: true
+conv_filters: 128
+dilation:
+- 2
+- 1
+drop_out: 0.5
+kernel_sizes:
+- 5
+- 3
+layers: 3
+strides:
+- 3
+- 1
+xavier_initialization: true

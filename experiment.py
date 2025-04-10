@@ -53,7 +53,8 @@ def eval_exp(experiments, hyperparams, input_dir='./model/experiment', output_di
             yaml.dump(config, file, default_flow_style=False)
         command = [
             'python', 'eval.py',
-            '-model_path', './model/experiment',
+            '-model_path', input_dir,
+            '-output', output_dir,
             '-config_path', 'temporal_config.yaml',
             '-model_name', name,
             '-data', './monthly_20d',
@@ -84,5 +85,5 @@ if __name__ == "__main__":
     if args.train:
         train_exp(experiments, hyperparams, args.output_dir)
     if args.eval:
-        eval_exp(experiments, hyperparams, args.output_dir)
+        eval_exp(experiments, hyperparams, args.input_dir, args.output_dir)
 
