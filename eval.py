@@ -114,7 +114,7 @@ def get_returns(df, final_predictions, ret_days=5, till_date=None, risk_free_rat
     avg_returns = {col: portfolio_returns[col].mean() for col in portfolio_returns.columns if col != 'Date'} # returns per periodic
     volatility = {col: portfolio_returns[col].std() * np.sqrt(annualization_factor) for col in portfolio_returns.columns if col != 'Date'} # annualized volatility 
     avg_annualized_returns = {col: (1 + ret) ** annualization_factor - 1 for col, ret in avg_returns.items()} # annualized returns
-    annualized_sharpe_ratio = {col: (avg_annualized_returns[col] - risk_free_rate) / volatility[col] for col in portfolio_returns.columns if col != 'Date'} # annualized harpe ratio 
+    annualized_sharpe_ratio = {f'Sharpe_Ratio_{col}': (avg_annualized_returns[col] - risk_free_rate) / volatility[col] for col in portfolio_returns.columns if col != 'Date'} # annualized sharpe ratio 
     return convert_to_python_types(avg_annualized_returns), convert_to_python_types(annualized_sharpe_ratio)
 
 def main():

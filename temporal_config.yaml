@@ -1,10 +1,10 @@
 activation: LReLu
 batch_normalization: true
-conv_filters: 128
+conv_filters: 64
 dilation:
 - 2
 - 1
-drop_out: 0.5
+drop_out: 0.25
 kernel_sizes:
 - 5
 - 3
