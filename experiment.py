@@ -27,13 +27,13 @@ def train_exp(experiments, hyperparams, ret_days=5,output_dir='./model/experimen
         '-output', './output/experiment',
         '-ckpt_path', './ckpt/experiment',
         '-config_path', 'temporal_config.yaml',
-        '-model_name', name,
+        '-model_name', f'baseline_I20R{ret_days}',
         '-device', 'cuda',
         '-batch_size', '128',
         '-num_workers', '4',
         '-learning_rate', '0.001',
         '-num_epochs', '50',
-        '-ret_days', ret_days,
+        '-ret_days', f'{ret_days}',
         '-year_start', '1993',
         '-year_split', '1999',
         '-year_end', '2019',
@@ -53,13 +53,13 @@ def train_exp(experiments, hyperparams, ret_days=5,output_dir='./model/experimen
         '-output', './output/experiment',
         '-ckpt_path', './ckpt/experiment',
         '-config_path', 'temporal_config.yaml',
-        '-model_name', f'baseline_I20R{ret_days}',
+        '-model_name', name,
         '-device', 'cuda',
         '-batch_size', '128',
         '-num_workers', '4',
         '-learning_rate', '0.001',
         '-num_epochs', '50',
-        '-ret_days', ret_days,
+        '-ret_days', f'{ret_days}',
         '-year_start', '1993',
         '-year_split', '1999',
         '-year_end', '2019',
@@ -81,7 +81,7 @@ def eval_exp(experiments, hyperparams, ret_days=5, input_dir='./model/experiment
         '-device', 'cuda',
         '-batch_size', '128',
         '-num_workers', '4',
-        '-ret_days', ret_days,
+        '-ret_days', f'{ret_days}',
     ]
     os.remove('temporal_config.yaml')
     for i in range(len(experiments)):
@@ -100,7 +100,7 @@ def eval_exp(experiments, hyperparams, ret_days=5, input_dir='./model/experiment
             '-device', 'cuda',
             '-batch_size', '128',
             '-num_workers', '4',
-            '-ret_days', ret_days,
+            '-ret_days', f'{ret_days}',
         ]
         subprocess.run(command)
         os.remove('temporal_config.yaml')

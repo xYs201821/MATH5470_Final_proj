@@ -4,7 +4,7 @@ conv_filters: 64
 dilation:
 - 2
 - 1
-drop_out: 0.25
+drop_out: 0
 kernel_sizes:
 - 5
 - 3
