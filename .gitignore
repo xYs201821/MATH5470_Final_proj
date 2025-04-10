@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Virtual Environment
+venv/
+env/
+
+# Model checkpoints and data
+*.pth
+*.zip
+output/
+ckpt/
+monthly_20d/
+<<<<<<< HEAD
+
+=======
+losses.csv
+losses.png
+model/
+>>>>>>> f5f4b71 (add experiment script)
+# macOS
+.DS_Store
+__MACOSX/
+
+# VSCode
+.vscode/
+
+# Misc
+*.log
