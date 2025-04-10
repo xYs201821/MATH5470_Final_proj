@@ -97,9 +97,9 @@ class CNN20(nn.Module):
     
     def _init_weights(self, m):
         if isinstance(m, nn.Conv2d):
-            init.xavier_uniform_(m.weight) if self.xavier_initialization else init.eye_(m.weight)
+            init.xavier_uniform_(m.weight) if self.xavier_initialization else init.zeros_(m.weight)
         if isinstance(m, nn.Linear):
-            init.xavier_uniform_(m.weight) if self.xavier_initialization else init.eye_(m.weight)
+            init.xavier_uniform_(m.weight) if self.xavier_initialization else init.zeros_(m.weight)
             init.zeros_(m.bias)
     
     def _get_activation(self):
