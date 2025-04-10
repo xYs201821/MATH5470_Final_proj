@@ -82,7 +82,7 @@ def get_labels_df(dir, start=2000, end=2020, ret_days=5):
     print(f"Successfully created combined DataFrame with {len(df)} total records")
     return df
 
-def get_returns(df, final_predictions, ret_days=5, till_date=None):
+def get_returns(df, final_predictions, ret_days=5, till_date=None, risk_free_rate=0.02):
     df_with_pred = df.copy()
     df_with_pred[f'pred_{ret_days}d'] = final_predictions[:, 1]
     df_with_pred['StockID'] = df_with_pred['StockID'].astype('category')
@@ -111,10 +111,11 @@ def get_returns(df, final_predictions, ret_days=5, till_date=None):
         result['Value-Weight_H-L'] = value_hl_return
         portfolio_returns.append(result)
     portfolio_returns = pd.DataFrame(portfolio_returns)  
-
     avg_returns = {col: portfolio_returns[col].mean() for col in portfolio_returns.columns if col != 'Date'} # returns per periodic
-    avg_annualized_returns = {col: ret * annualization_factor for col, ret in avg_returns.items()} # annualized returns
-    return convert_to_python_types(avg_annualized_returns)
+    volatility = {col: portfolio_returns[col].std() * np.sqrt(annualization_factor) for col in portfolio_returns.columns if col != 'Date'} # annualized volatility 
+    avg_annualized_returns = {col: (1 + ret) ** annualization_factor - 1 for col, ret in avg_returns.items()} # annualized returns
+    annualized_sharpe_ratio = {col: (avg_annualized_returns[col] - risk_free_rate) / volatility[col] for col in portfolio_returns.columns if col != 'Date'} # annualized harpe ratio 
+    return convert_to_python_types(avg_annualized_returns), convert_to_python_types(annualized_sharpe_ratio)
 
 def main():
     parser = argparse.ArgumentParser(description='Test ML model and get metrics')
@@ -139,10 +140,11 @@ def main():
     final_predictions, metrics = get_pred_metrics(model, test_loader, args.device)
     df = get_labels_df(args.data, args.year_split+1, args.year_end+1, args.ret_days)
     
-    avg_annualized_returns = get_returns(df, final_predictions, args.ret_days)
+    avg_annualized_returns, sharpe_ratio = get_returns(df, final_predictions, args.ret_days)
     with open(os.path.join(args.output, f'{args.model_name}.yaml'), 'w') as f:
         yaml.dump(metrics, f, default_flow_style=False)
         #yaml.dump(avg_returns, f, default_flow_style=False)
+        yaml.dump(sharpe_ratio, f, default_flow_style=False)
         yaml.dump(avg_annualized_returns, f, default_flow_style=False)
     #print(f"Average Returns: {avg_returns}")
     #print(f"Average Annualized Returns: {avg_annualized_returns}")

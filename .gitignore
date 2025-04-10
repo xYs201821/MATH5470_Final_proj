@@ -14,13 +14,10 @@ env/
 output/
 ckpt/
 monthly_20d/
-<<<<<<< HEAD
-
-=======
 losses.csv
 losses.png
 model/
->>>>>>> f5f4b71 (add experiment script)
+temporal_config.yaml
 # macOS
 .DS_Store
 __MACOSX/
