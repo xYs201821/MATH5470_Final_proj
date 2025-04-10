@@ -38,7 +38,7 @@ def main():
     parser.add_argument('-batch_size', type=int, default=128, help='Batch size for testing')
     parser.add_argument('-num_workers', type=int, default=4, help='Number of workers for testing')
     parser.add_argument('-model_name', type=str, default='baseline_I20R5', required=True, help='Model name')
-    parser.add_argument('-learning_rate', type=float, default=0.001, help='Learning rate for optimizer')
+    parser.add_argument('-learning_rate', type=float, default=1e-5, help='Learning rate for optimizer')
     parser.add_argument('-num_epochs', type=int, default=50, help='Number of epochs for training')
     parser.add_argument('-tolerence', type=float, default=1e-5, help='Tolerance for early stopping')
     parser.add_argument('-patience', type=int, default=2, help='Patience for early stopping')

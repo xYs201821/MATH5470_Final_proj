@@ -39,6 +39,7 @@ def train_exp(experiments, hyperparams, ret_days=5,output_dir='./model/experimen
         '-year_end', '2019',
         '-ratio', '0.7'
         ]
+    subprocess.run(command)
     os.remove('temporal_config.yaml')
     for i in range(len(experiments)):
         name = f"{hyperparams[i]}_{experiments[i]}"
@@ -83,6 +84,7 @@ def eval_exp(experiments, hyperparams, ret_days=5, input_dir='./model/experiment
         '-num_workers', '4',
         '-ret_days', f'{ret_days}',
     ]
+    subprocess.run(command)
     os.remove('temporal_config.yaml')
     for i in range(len(experiments)):
         name = f"{hyperparams[i]}_{experiments[i]}"
@@ -111,8 +113,10 @@ if __name__ == "__main__":
     mode_group.add_argument('--train', action='store_true', help='Train the model')
     mode_group.add_argument('--eval', action='store_true', help='Evaluate the model')
     parser.add_argument('--ret_days', type=int, default=5, help='Number of days to predict')
-    parser.add_argument('--output_dir', type=str, default='./output/experiment', help='Output directory')
+    if '--train' in sys.argv:
+        parser.add_argument('--output_dir', type=str, default='./model/experiment', help='Output directory')
     if '--eval' in sys.argv:
+        parser.add_argument('--output_dir', type=str, default='./output/experiment', help='Output directory')
         parser.add_argument('--input_dir', type=str, default='./model/experiment', help='Input model directory')
     args = parser.parse_args()
     keys, values = zip(*experiment_variations.items())
