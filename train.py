@@ -11,7 +11,7 @@ from train_utils import trainer
 import argparse
 import os
 
-def plot_loss(train_loss, val_loss, num_epochs):
+def plot_loss(train_loss, val_loss, num_epochs, model_name, output):
     import matplotlib.pyplot as plt
     plt.semilogy(range(num_epochs + 1), train_loss, label='Train Loss')
     plt.semilogy(range(num_epochs + 1), val_loss, label='Validation Loss')
@@ -19,7 +19,7 @@ def plot_loss(train_loss, val_loss, num_epochs):
     plt.ylabel('Loss')
     plt.legend()
     plt.show()
-    plt.savefig('losses.png')
+    plt.savefig(f'{output}/{model_name}_losses.png')
 
 def model_from_config(config):
     model = CNN20(**config)
@@ -40,7 +40,7 @@ def main():
     parser.add_argument('-model_name', type=str, default='baseline_I20R5', required=True, help='Model name')
     parser.add_argument('-learning_rate', type=float, default=1e-5, help='Learning rate for optimizer')
     parser.add_argument('-num_epochs', type=int, default=50, help='Number of epochs for training')
-    parser.add_argument('-tolerence', type=float, default=1e-5, help='Tolerance for early stopping')
+    parser.add_argument('-tolerence', type=float, default=0, help='Tolerance for early stopping')
     parser.add_argument('-patience', type=int, default=2, help='Patience for early stopping')
 
     parser.add_argument('-ret_days', type=int, default=5, help='Number of days to predict')
@@ -104,19 +104,16 @@ def main():
     for name, param in model.named_parameters():
         if param.requires_grad:
             total_training_parameters += param.numel()
-    print(f"[INFO] Number of training parameters: {total_training_parameters}.")
+    print(f"[INFO]Number of training parameters: {total_training_parameters}")
 
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
 
-    model, train_losses, val_losses, epochs = trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs, device,
+    model, metrics_df = trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs, device,
                                                       patience, tolerence, ckpt_path, model_name)
     torch.save(model.state_dict(), os.path.join(model_path, f'{model_name}.pth'))
-    results = pd.DataFrame({'Train Loss': train_losses,
-        'Validation Loss': val_losses})
-    results.to_csv('losses.csv', index=False)
-    print("[INFO]Training losses saved to losses.csv")
-    plot_loss(train_losses, val_losses, epochs)
+    metrics_df.to_csv(f'{args.output}/{model_name}_metrics.csv', index=False)
+    print(f"[INFO]Training losses saved to {args.output}/{model_name}_metrics.csv")
 if __name__=="__main__":
     main()
 

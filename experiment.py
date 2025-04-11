@@ -22,22 +22,23 @@ def train_exp(experiments, hyperparams, ret_days=5,output_dir='./model/experimen
         yaml.dump(config, file, default_flow_style=False)
     command = [
         'python', 'train.py',
-        '-model_path', './model/experiment',
+        '-model_path', output_dir,
         '-data', './monthly_20d',
         '-output', './output/experiment',
         '-ckpt_path', './ckpt/experiment',
         '-config_path', 'temporal_config.yaml',
         '-model_name', f'baseline_I20R{ret_days}',
         '-device', 'cuda',
+        '-seed', '5470',
         '-batch_size', '128',
         '-num_workers', '4',
-        '-learning_rate', '0.001',
+        '-learning_rate', '1e-5',
         '-num_epochs', '50',
         '-ret_days', f'{ret_days}',
         '-year_start', '1993',
         '-year_split', '1999',
         '-year_end', '2019',
-        '-ratio', '0.7'
+        '-ratio', '0.7',
         ]
     subprocess.run(command)
     os.remove('temporal_config.yaml')
@@ -49,22 +50,23 @@ def train_exp(experiments, hyperparams, ret_days=5,output_dir='./model/experimen
             yaml.dump(config, file, default_flow_style=False)
         command = [
         'python', 'train.py',
-        '-model_path', './model/experiment',
+        '-model_path', output_dir,
         '-data', './monthly_20d',
         '-output', './output/experiment',
         '-ckpt_path', './ckpt/experiment',
         '-config_path', 'temporal_config.yaml',
         '-model_name', name,
+        '-seed', '5470',
         '-device', 'cuda',
         '-batch_size', '128',
         '-num_workers', '4',
-        '-learning_rate', '0.001',
+        '-learning_rate', '1e-5',
         '-num_epochs', '50',
         '-ret_days', f'{ret_days}',
         '-year_start', '1993',
         '-year_split', '1999',
         '-year_end', '2019',
-        '-ratio', '0.7'
+        '-ratio', '0.7',
         ]
         subprocess.run(command)
         os.remove('temporal_config.yaml')

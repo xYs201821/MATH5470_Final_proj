@@ -19,7 +19,7 @@ IMAGE_HEIGHT = {5: 32, 20: 64, 60: 96}
 def load_model(model_path, model_name, device, config_path='./config.yaml'):
     config = yaml.safe_load(open(config_path, 'r'))
     model = CNN20(**config)
-    model.load_state_dict(torch.load(os.path.join(model_path, f"{model_name}.pth"), weights_only=True))
+    model.load_state_dict(torch.load(os.path.join(model_path, f"{model_name}.pth"), map_location=device))
     model.to(device)
     model.eval()
     return model
@@ -37,12 +37,13 @@ def load_dataset(dir, start=2000, end=2020, ret_days=5, batch_size=128, num_work
 def get_pred_metrics(model, test_loader, device):
     TP = TN = FP = FN = 0
     all_predictions = []
-    model.eval()
+    loss = 0
     for i, (images, labels) in tqdm(enumerate(test_loader)):
         images = images.to(device)
         labels = labels.to(device)
         with torch.no_grad():
             outputs = model(images)
+        loss += nn.CrossEntropyLoss()(outputs, labels).item() * images.shape[0]
         predictions = F.softmax(outputs, dim=1)
         all_predictions.append(predictions.cpu().numpy()) 
         _, pred = torch.max(predictions, dim=1)
@@ -61,7 +62,7 @@ def get_pred_metrics(model, test_loader, device):
     print(f"Precision: {precision:.4f}")
     print(f"Recall: {recall:.4f}")
     print(f"F1 Score: {f1:.4f}")
-    metrics = {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1}
+    metrics = {"accuracy": accuracy, "precision": precision, "recall": recall, "f1": f1, "loss": loss / len(test_loader.dataset), "TP": TP, "TN": TN, "FP": FP, "FN": FN}
     return final_predictions, convert_to_python_types(metrics)
 
 def get_labels_df(dir, start=2000, end=2020, ret_days=5):

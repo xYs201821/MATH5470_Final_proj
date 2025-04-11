@@ -2,6 +2,9 @@ from tqdm import tqdm
 import torch
 import time
 import os
+import torch.nn.functional as F
+import pandas as pd
+from utils import convert_to_python_types
 class recorder():
     def __init__(self, patience=2, tolerence=0, ckpt_path='checkpoint.pt'):
         self.patience = patience
@@ -30,8 +33,7 @@ def trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs,
     
     def epoch_train():
         model.train()
-        running_loss = .0
-        train_loss = .0
+        TP = TN = FP = FN = train_loss = 0.
         for i, (images, labels) in tqdm(enumerate(train_loader)):
             optimizer.zero_grad()
             images = images.to(device)
@@ -41,36 +43,79 @@ def trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs,
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * images.shape[0]
-            running_loss += loss.item() * images.shape[0]
+            predictions = F.softmax(outputs, dim=1)
+            _, pred = torch.max(predictions, dim=1)
+            TP += ((pred == labels) & (labels == 1)).sum()
+            TN += ((pred == labels) & (labels == 0)).sum()
+            FP += ((pred != labels) & (labels == 0)).sum()
+            FN += ((pred != labels) & (labels == 1)).sum()
+        TOT = TP + TN + FP + FN
+        accuracy = (TP + TN) / TOT
+        precision = TP / (TP + FP)
+        recall = TP / (TP + FN)
+        f1 = 2 * (precision * recall) / (precision + recall)
             # if (i+1) % 100 == 0:
             #     print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], Loss: {running_loss/100:.4f}")
             #     running_loss = .0 
         train_loss /= len(train_loader.dataset)
+        metrics = {
+            'loss': train_loss,
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1,
+            'TP': TP,
+            'TN': TN,
+            'FP': FP,
+            'FN': FN
+        }
         print(f"Epoch [{epoch+1}/{num_epochs}], Training_Loss: {train_loss:.4f}")
-        return train_loss
+        return convert_to_python_types(metrics)
     
     def epoch_eval():
         model.eval()
-        val_loss = .0
+        TP = TN = FP = FN = val_loss = 0.
         with torch.no_grad():
             for i, (images, labels) in tqdm(enumerate(val_loader)):
                 images = images.to(device)
                 labels = labels.to(device)
                 outputs = model(images)
                 loss = criterion(outputs, labels)
-                val_loss += loss.item() * images.shape[0]
+                val_loss += loss.item() * images.shape[0]        
+                predictions = F.softmax(outputs, dim=1)
+                _, pred = torch.max(predictions, dim=1)
+                TP += ((pred == labels) & (labels == 1)).sum()
+                TN += ((pred == labels) & (labels == 0)).sum()
+                FP += ((pred != labels) & (labels == 0)).sum()
+                FN += ((pred != labels) & (labels == 1)).sum()
+        TOT = TP + TN + FP + FN
+        accuracy = (TP + TN) / TOT
+        precision = TP / (TP + FP)
+        recall = TP / (TP + FN)
+        f1 = 2 * (precision * recall) / (precision + recall)
         val_loss /= len(val_loader.dataset)
         print(f"Epoch [{epoch+1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
-        return val_loss
+        metrics = {
+            'loss': val_loss,
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1,
+            'TP': TP,
+            'TN': TN,
+            'FP': FP,
+            'FN': FN
+        }
+        return convert_to_python_types(metrics)
     start = time.time()
-    train_losses = []
-    val_losses = []
+    train_metrics = []
+    val_metrics = []
     record = recorder(patience=patience, tolerence=tolerence, ckpt_path=ckpt_path)
     print(f"[INFO]Training on {device}!")
     for epoch in range(num_epochs):
-        train_losses.append(epoch_train())
-        val_losses.append(epoch_eval())
-        early_stopping = record(val_losses[-1], epoch)
+        train_metrics.append(epoch_train())
+        val_metrics.append(epoch_eval())
+        early_stopping = record(val_metrics[-1]['loss'], epoch)
         if early_stopping:
             print(f"[INFO]Early stopping at epoch {epoch + 1}")
             print(f"[INFO]Best epoch: {record.best_epoch + 1}")
@@ -82,5 +127,10 @@ def trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs,
     model.load_state_dict(torch.load(os.path.join(ckpt_path, f'{name}_{record.best_epoch + 1}.pth'),
                                      weights_only=True))
     time_elapsed = time.time() - start
+    train_df = pd.DataFrame(train_metrics).add_suffix('_train')
+    val_df = pd.DataFrame(val_metrics).add_suffix('_val')
+    if len(train_df) == len(val_df):
+        metrics_df = pd.concat([train_df, val_df], axis=1)
+        metrics_df['iteration'] = range(len(metrics_df))
     print(f'[INFO]Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
-    return model, train_losses, val_losses, epoch
+    return model, metrics_df

@@ -1,1 +1,9 @@
 python train.py -model_path model -config_path params.yaml -ckpt_path ckpt -output output -data monthly_20d -seed 42 -device cuda -batch_size 128 -num_workers 4 -ratio 0.7 -model_name baseline_I20R5 -ret_days 5 -chronological
+
+python train.py -data ./monthly_20d -model_path ./model -config_path config.yaml -model_name baseline_I20R20 -ret_days 20 -tolerence 0 -seed 5470 -batch_size 128 -learning_rate 1e-5 -patience 2
+
+python eval.py -data ./monthly_20d -model_path ./model -config_path config.yaml -model_name baseline_I20R20 -ret_days 20 -batch_size 128 
+
+python experiment.py --train --output_dir model/I20R20_5470 --ret_days 20
+
+python experiment.py --eval --input_dir model/I20R20_5470 --ret_days 20 --output_dir model/I20R20_5470

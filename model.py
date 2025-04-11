@@ -104,7 +104,7 @@ class CNN20(nn.Module):
     
     def _get_activation(self):
         activation_map ={
-            "lrelu": nn.LeakyReLU(),
+            "lrelu": nn.LeakyReLU(0.01),
             "relu": nn.ReLU(),
             "tanh": nn.Tanh(),
             "gelu": nn.GELU(),
