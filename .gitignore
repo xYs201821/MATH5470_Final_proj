@@ -11,12 +11,14 @@ env/
 # Model checkpoints and data
 *.pth
 *.zip
-output/
+#output/
 ckpt/
 monthly_20d/
 losses.csv
 losses.png
-model/
+#model/
+trash/
+label_comlumns.txt
 temporal_config.yaml
 # macOS
 .DS_Store
