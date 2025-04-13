@@ -32,7 +32,6 @@ def trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs,
                patience=2, tolerence=0, ckpt_path='./ckpt', name='baseline'):
     
     def epoch_train():
-        model.train()
         TP = TN = FP = FN = train_loss = 0.
         for i, (images, labels) in tqdm(enumerate(train_loader)):
             optimizer.zero_grad()
@@ -73,7 +72,6 @@ def trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs,
         return convert_to_python_types(metrics)
     
     def epoch_eval():
-        model.eval()
         TP = TN = FP = FN = val_loss = 0.
         with torch.no_grad():
             for i, (images, labels) in tqdm(enumerate(val_loader)):
@@ -113,7 +111,9 @@ def trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs,
     record = recorder(patience=patience, tolerence=tolerence, ckpt_path=ckpt_path)
     print(f"[INFO]Training on {device}!")
     for epoch in range(num_epochs):
+        model.train()
         train_metrics.append(epoch_train())
+        model.eval()
         val_metrics.append(epoch_eval())
         early_stopping = record(val_metrics[-1]['loss'], epoch)
         if early_stopping:
@@ -124,8 +124,7 @@ def trainer(model, train_loader, val_loader, criterion, optimizer, num_epochs,
         save_path = os.path.join(ckpt_path, f'{name}_{epoch + 1}.pth')
         torch.save(model.state_dict(), save_path)
         print(f"Epoch [{epoch +1}/{num_epochs}], Checkpoint saved at {save_path}")
-    model.load_state_dict(torch.load(os.path.join(ckpt_path, f'{name}_{record.best_epoch + 1}.pth'),
-                                     weights_only=True))
+    model.load_state_dict(torch.load(os.path.join(ckpt_path, f'{name}_{record.best_epoch + 1}.pth')))
     time_elapsed = time.time() - start
     train_df = pd.DataFrame(train_metrics).add_suffix('_train')
     val_df = pd.DataFrame(val_metrics).add_suffix('_val')

@@ -7,7 +7,7 @@ IMAGE_WIDTH = {5: 15, 20: 60, 60: 180}
 IMAGE_HEIGHT = {5: 32, 20: 64, 60: 96}    
 
 class CNN_Dataset(Dataset):
-    def __init__(self, dir, year, ret_days=5):
+    def __init__(self, dir, year, ret_days=5, regression=False):
         images_path = os.path.join(dir, f'20d_month_has_vb_[20]_ma_{year}_images.dat')
         images = np.memmap(images_path, dtype=np.uint8, mode='r')
         images = images.reshape((-1,1, IMAGE_HEIGHT[20], IMAGE_WIDTH[20]))
@@ -18,7 +18,10 @@ class CNN_Dataset(Dataset):
 
         missing = labels.isna() 
         self.images = torch.tensor(images[~missing], dtype=torch.float)
-        self.labels = torch.tensor(labels[~missing]>0, dtype=torch.long)
+        if regression:
+            self.labels = torch.tensor(labels[~missing], dtype=torch.float)
+        else:
+            self.labels = torch.tensor(labels[~missing]>0, dtype=torch.long)
 
     def __len__(self):
         return self.images.shape[0]
@@ -26,14 +29,14 @@ class CNN_Dataset(Dataset):
     def __getitem__(self, idx):
         return self.images[idx], self.labels[idx]
     
-def get_years_dataset(dir, year_start, year_end, ret_days=5):
+def get_years_dataset(dir, year_start, year_end, ret_days=5, regression=False):
     dataset = []
     for year in range(year_start, year_end):
-        dataset = torch.utils.data.ConcatDataset([dataset, CNN_Dataset(dir, year, ret_days)])
+        dataset = torch.utils.data.ConcatDataset([dataset, CNN_Dataset(dir, year, ret_days, regression)])
     print(f"[INFO]Length of {year_start}-{year_end-1} datasets: {len(dataset)}") 
     return dataset
 
-def train_val_split(dataset, ratio=0.7, generator=None, chronological=False):
+def train_val_split(dataset, ratio=0.7, chronological=False, generator=None):
     train_size = int(ratio * len(dataset))
     val_size = len(dataset) - train_size
     if chronological:

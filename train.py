@@ -33,7 +33,7 @@ def main():
     parser.add_argument('-ckpt_path', type=str, default='./ckpt')
     parser.add_argument('-config_path', type=str, required=True, help='Path to config file, if provided, it will override the default parameters')
 
-    parser.add_argument('-seed', type=int, default=42, help='Random seed for reproducibility')
+    parser.add_argument('-seed', type=int, help='Random seed for reproducibility')
     parser.add_argument('-device', type=str, default='cuda', help='Device to use for testing')
     parser.add_argument('-batch_size', type=int, default=128, help='Batch size for testing')
     parser.add_argument('-num_workers', type=int, default=4, help='Number of workers for testing')
@@ -45,15 +45,16 @@ def main():
 
     parser.add_argument('-ret_days', type=int, default=5, help='Number of days to predict')
     parser.add_argument('-year_start', type=int, default=1993, help='Year to start')
-    parser.add_argument('-year_split', type=int, default=1999, help='Year to split')
+    parser.add_argument('-year_split', type=int, default=2000, help='Year to split')
     parser.add_argument('-year_end', type=int, default=2019, help='Year to end')
     parser.add_argument('-ratio', type=float, default=0.7, help='Train/validation split ratio')
     parser.add_argument('-chronological', action='store_true', help='Use chronological split for train/validation')
     args = parser.parse_args()
     seed = args.seed
     device = args.device
-    torch.manual_seed(seed)
-    generator = torch.Generator().manual_seed(seed)
+    if seed:
+        torch.manual_seed(seed)
+        generator = torch.Generator().manual_seed(seed)
     model_path = args.model_path
     data_path = args.data
     ckpt_path = args.ckpt_path 
@@ -85,7 +86,7 @@ def main():
         model = model_from_config(model_configs)
     model = model_from_config(model_configs).to(device)
 
-    train_dataset, val_dataset = train_val_split(get_years_dataset(data_path, year_start, year_split + 1, ret_days), ratio, generator, chronological)
+    train_dataset, val_dataset = train_val_split(get_years_dataset(data_path, year_start, year_split + 1, ret_days), ratio, chronological)
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,

@@ -1,3 +1,0 @@
-python eval.py -device cuda -batch_size 128 -num_workers 4 -model_path ./model -data ./monthly_20d -output ./output -metric all -year_split 1999 -year_end 2019 -ret_days 5 -model_name baseline_I20R5
-
-python train.py -seed 42 -device cuda -batch_size 128 -num_workers 4 -model_path ./model -data ./monthly_20d -ckpt_path ./ckpt -year_start 1993 -year_split 1999 -year_end 2019 -ratio 0.7 -ret_days 5 -model_name baseline_I20R5_random_split

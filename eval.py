@@ -73,12 +73,12 @@ def get_labels_df(dir, start=2000, end=2020, ret_days=5):
             labels_df = pd.read_feather(labels_path)
             labels = labels_df[f'Ret_{ret_days}d']
             missing = labels.isna()
-            print(f"Year {year}: Found {missing.sum()} missing labels.")
+           #print(f"Year {year}: Found {missing.sum()} missing labels.")
             filtered_df = labels_df[~missing].copy()
             if 'year' not in filtered_df.columns:
                 filtered_df['year'] = year
             dfs.append(filtered_df)
-            print(f"Year {year}: Added {len(filtered_df)} records with non-missing return values.")
+            #print(f"Year {year}: Added {len(filtered_df)} records with non-missing return values.")
     df = pd.concat(dfs, ignore_index=True)
     print(f"Successfully created combined DataFrame with {len(df)} total records")
     return df
@@ -95,7 +95,6 @@ def get_returns(df, final_predictions, ret_days=5, till_date=None, risk_free_rat
         date_group['decile'] = pd.qcut(date_group[f'pred_{ret_days}d'], 10, labels=False) + 1
         value_weighted_returns = {}
         for decile, decile_group in date_group.groupby('decile'):
-                # Use absolute values for market cap to handle negative values
                 total_market_cap = decile_group['MarketCap'].abs().sum()
                 decile_group['weight'] = decile_group['MarketCap'].abs() / total_market_cap
                 value_weighted_returns[decile] = (decile_group[f"Ret_{ret_days}d"] * decile_group['weight']).sum()
@@ -131,7 +130,7 @@ def main():
     parser.add_argument('-device', type=str, default='cuda', help='Device to use for testing')
     parser.add_argument('-batch_size', type=int, default=128, help='Batch size for testing')
     parser.add_argument('-num_workers', type=int, default=4, help='Number of workers for testing')
-    parser.add_argument('-year_split', type=int, default=1999, help='Year to start testing data')
+    parser.add_argument('-year_split', type=int, default=2000, help='Year to start testing data')
     parser.add_argument('-year_end', type=int, default=2019, help='Year to end testing data')
     args = parser.parse_args()
     if not os.path.exists(args.output):

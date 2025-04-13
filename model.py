@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 
-
 class CNN20(nn.Module):
     def __init__(self,
                 drop_out=0.5,
