@@ -69,6 +69,6 @@ if __name__ == "__main__":
                 os.makedirs(f'output/grad-cam', exist_ok=True)
             # Save the image
             cv2.imwrite(
-                f'output/grad-cam/{args.model_name}_grad_cam_2019_20d_conv-layer{i}_date_{j}.png', 
+                f'output/grad-cam/{args.model_name}_grad_cam_1995_20d_conv-layer{i}_date_{j}.png', 
                 cv2.cvtColor(cam_image, cv2.COLOR_RGB2BGR)
             )
